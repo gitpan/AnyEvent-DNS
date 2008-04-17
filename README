@@ -1,0 +1,110 @@
+NAME
+    AnyEvent::DNS - Helper for non-blocking DNS queries with Net::DNS
+
+VERSION
+    Version 0.01
+
+SYNOPSIS
+        use AnyEvent::DNS;
+
+        my $d = AnyEvent::DNS->new (
+           timeout  => 10,
+           resolver => [
+              nameservers => [qw/127.0.0.1/]
+           ]
+        );
+
+        $d->send (sub {
+           my ($pkt, $err, $errdesc) = @_;
+           if ($err) {
+              warn "Couldn't lookup: $err/$errdesc\n";
+           } else {
+              print "lookup response: ".$pkt->string."\n";
+           }
+        }, 'www.google.de', 'A');
+
+DESCRIPTION
+    This module is a thin wrapper to make non-blocking requests with
+    Net::DNS. The main object, of the class AnyEvent::DNS, is a wrapper
+    object around a Net::DNS::Resolver. And you are able to send
+    non-blocking lookup queries, specify a timeout and assign a callback to
+    process the results.
+
+METHODS
+    new (%args)
+        This is the constructor for AnyEvent::DNS, %args can have following
+        keys:
+
+        *   "timeout"
+
+            The timeout in seconds for a lookup requests sent via the "send"
+            method. If not set, no timeout will be installed.
+
+        *   "resolver"
+
+            This key should have an array reference as value, which contains
+            the arguments passed to the Net::DNS::Resolver constructor.
+
+    resolver
+        Returns the internal Net::DNS::Resolver object used for queries.
+
+    send ($cb, @bgsend_args)
+        This method will send a query via the "bgsend" method of
+        Net::DNS::Resolver and take care of installing the watcher and
+        timeouts and error reporting.
+
+        The callback $cb will have following arguments:
+
+           my ($pkt, $err, $errdesc) = @_;
+
+        Where $pkt is the Net::DNS::Packet object we got as response to the
+        query. $err is one of: 'send failed', 'timeout', 'lookup failed',
+        indicating the general cause of the error. $errdesc will contain the
+        error description as returned by the "errorstring" method of
+        Net::DNS::Resolver.
+
+        If $err is not defined the query was successful and $pkt is set to
+        the response object.
+
+        See also Net::DNS::Packet for more details about $pkt.
+
+AUTHOR
+    Robin Redeker, "<elmex at ta-sa.org>"
+
+BUGS
+    Please report any bugs or feature requests to "bug-anyevent-dns at
+    rt.cpan.org", or through the web interface at
+    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=AnyEvent-DNS>. I will be
+    notified, and then you'll automatically be notified of progress on your
+    bug as I make changes.
+
+SUPPORT
+    You can find documentation for this module with the perldoc command.
+
+        perldoc AnyEvent::DNS
+
+    You can also look for information at:
+
+    *   AnnoCPAN: Annotated CPAN documentation
+
+        <http://annocpan.org/dist/AnyEvent-DNS>
+
+    *   CPAN Ratings
+
+        <http://cpanratings.perl.org/d/AnyEvent-DNS>
+
+    *   RT: CPAN's request tracker
+
+        <http://rt.cpan.org/NoAuth/Bugs.html?Dist=AnyEvent-DNS>
+
+    *   Search CPAN
+
+        <http://search.cpan.org/dist/AnyEvent-DNS>
+
+ACKNOWLEDGEMENTS
+COPYRIGHT & LICENSE
+    Copyright 2008 Robin Redeker, all rights reserved.
+
+    This program is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
